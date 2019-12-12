@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% block content %}
+{% if user.username %}
+<div class="container">
+    <div class="content-section ">
+        <h3 style="color:red;">You are already connected</h3>
+    </div>
+</div>
+{% else %}
+    <div class="container">
+        <div class="content-section ">
+            <form method="POST">
+                {% csrf_token %}
+                <fieldset class="form-group register-group">
+                    <legend class="border-bottom mb-4">Log in</legend>
+                    {{ form|crispy }}
+                </fieldset>
+                <div class="form-group register-group">
+                    <button class="btn btn-danger" type="submit">Sign In</button>
+                    <small class="text-muted ml-2">
+                        <a style="color:red;" href="{% url 'password_reset' %}">Forgot Password?</a>
+                    </small>
+                </div>
+            </form>
+           <a href="https://api.intra.42.fr/oauth/authorize?client_id=5123688fe53d089acd8fb1f9bf1bd437e8d4f3628dc5d79b033b357deafbb01a&redirect_uri=http%3A%2F%2Flocalhost%3A8000&response_type=code"><img style="max-width: 40px; margin-bottom: 15px; border-radius: 60px" src="{% static 'logo/42.png' %}"/></a>
+           <a href="{% url 'social:begin' 'github' %}"><img style="max-width: 37px; margin-left: 6px; margin-bottom: 15px;" src="{% static 'logo/github.png' %}"/></a>
+           <a href="{% url 'social:begin' 'facebook' %}"><img style="max-width: 50px; margin-bottom: 15px;" src="{% static 'logo/facebook_icon.png' %}"/></a>
+            <a href="{% url 'social:begin' 'google-oauth2' %}"><img style="max-width: 37px; border-radius: 18px; margin-bottom: 15px;" src="{% static 'logo/google.png' %}"/></a>
+            <div class="border-top pt-3">
+                <small class="text-muted">
+                    Need An Account? <a style="color: #dc3545;" class="ml-2" href="{% url 'register' %}">Register</a>
+                </small>
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock content %}

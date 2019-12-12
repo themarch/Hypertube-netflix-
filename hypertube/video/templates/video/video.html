@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+{% load crispy_forms_tags %}
+
+
+    <main role="main" class="container">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <div class="container">
+            <div class="row">
+                <div class="column">
+               {% if grey == 1 %}
+                    <img class="image_video" src="{{miniature}} {{miniature_serie}}" alt="Mountains" style="max-width:100%; filter: grayscale(1)">
+                {% endif %}
+                {% if grey == 0 %}
+                    <img class="image_video" src="{{miniature}} {{miniature_serie}}" alt="Mountains" style="max-width:100%;">
+                {% endif %}
+                </div>
+                <div class="column col-md-8">
+                    <h2 class="color_red"> {{ titre }}</h1>
+                    <h6 class="color_white1" >Notes : {{notes}} <i onclick="myFunction(this)" class="fa fa-thumbs-up"></i> </h6>
+                    <h6 class="color_white" >Année de sortie : {{annee}}</h6>
+                    <h6 class="color_white" >Acteurs : {{acteurs}} </h6>
+                    <h6 class="color_white"> Catégories : {{category}}</h6>
+                    <h6 class="color_white_synopsis"> Synopsis : {{synopsis}}</h6>
+                </div>
+            </div>
+            <div style="padding-bottom: 4%" class="row">
+                <div class="place_watch_button column col-md-12">
+                   <h1 id='watch' class="watch_button">Watch now</h1>
+                </div>
+            </div>
+                        <div class="com_container container">
+                <div class="row">
+                    <h2>Comments</h2>
+                </div>
+                <hr>
+                <form style="padding-bottom: 50px" method="POST">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <center><button style="margin-top: -25px; float: right;" class="btn btn-danger">Envoyer</button></center>
+                </form>
+                {% for item1, item2, item3 in comments %}
+                    <div class="row comment">
+                        <div class="head">
+                            <small><strong class='user'><a style="font-size: 15px; color:rgb(202,52,50)" href="{% url 'public_profile' id_user=item3 %}">{{item1}}</a></strong> 30.10.2017 12:13</small>
+                        </div> 
+                        <p>{{item2}}</p>
+                    </div>
+                    <hr>
+                {% endfor %}
+            </div>
+        </div>
+
+<script>
+            function myFunction(x) {
+                x.classList.toggle("fa-thumbs-down");
+            }
+            function editSize(elem, new_size) {
+                elem.style.height = new_size;
+            }
+            elem = document.getElementsByTagName('textarea')[0];
+            elem.addEventListener("click", function(){editSize(elem, "85px")}, false);
+        </script>
+        <script>document.getElementsByTagName('textarea')[0].setAttribute('placeholder', 'Please be constructive !');</script>
+<script>
+$value = 0;
+document.getElementById("watch").addEventListener("click", function(){
+        document.querySelector(".image_video").style = 'filter:grayscale(1);'
+        var resp = {
+            'yeah': $value
+        };
+        $value = 1;
+        $.ajax({
+          type: 'POST',
+          url: `${window.location}`,
+          data: {csrfmiddlewaretoken: window.CSRF_TOKEN, 'yeah' : $value},
+          success: function(data){
+             // console.log($value)
+          }
+    });
+})
+</script>
+    <script src="{% static 'js/player.js' %}"></script>
+    </main>
+  {% endblock %}

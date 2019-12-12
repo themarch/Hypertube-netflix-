@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <div class="content-section">
+      <div class="media">
+        <img class="rounded-circle account-img" src="{{ user.profile.image.url }}">
+        <div class="media-body">
+          <h2 class="account-heading">{{ user.username }}</h2>
+         <p class="text-secondary">{{ user.email }}</p>
+        </div>
+      </div>
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="selectpicker"> {{ l_form.language }} </div>
+        <fieldset class="form-group register-group">
+            <legend class="border-bottom mb-4">Profile Info</legend>
+            <!-- <p class="name_supp"> Username </p> -->
+            {{ u_form|crispy }}
+            <!-- <p class="name_supp"> Email </p> -->
+            {{m_form|crispy}}
+             <!-- <p class="name_supp"> Image </p> -->
+            {{ p_form|crispy }}
+        </fieldset>
+        <div class="form-group register-group">
+            <button class="btn btn-danger" type="submit">Update</button>
+            <a href="/login/list_user">
+            <img class="egg" src="../../../static/logo/egg.png">
+            </a>
+        </div>
+      </form>
+    </div>
+{% endblock content %}

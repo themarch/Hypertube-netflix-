@@ -1,0 +1,210 @@
+{%load static%}
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="shortcut icon" type="image/png" href="{% static '/logo/favicon.ico' %}"/>
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}"t ype="text/css">
+    <link rel="stylesheet" href="{% static 'css/bootstrap-social.css' %}" type="text/css">
+    {% if title %}
+      <title>HyperTube - {{ title }}</title>
+    {% else %}
+      <title>HyperTube</title>
+    {% endif %}
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
+        <div class="container">
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation"> 
+          <span class="navbar-toggler-icon"></span>
+          </button>
+          <a href="{% url 'list' %}"><img src="https://fontmeme.com/permalink/191028/f17af05d35e163edc632c92a2e1e32fc.png" alt="netflix-font" border="0"></a>
+            {% if user.is_authenticated %}
+          <div class="collapse navbar-collapse" id="navbarToggle">
+              <div class="navbar-nav mr-auto">
+                <form class="form-inline" action="{% url 'search' %}" method="POST">
+                    {% csrf_token %}
+                  <input name="film_search" class="form-control mr-sm-2" type="text" placeholder="Search" value="">
+                  <button class="btn btn-danger" type="submit">Search</button>
+                </form>             
+              </div>
+            {% endif %}
+            <!-- Navbar Right Side -->
+            <div class="navbar-nav">
+                <ul class="navbar-nav ml-auto nav-flex-icons">
+                    <li class="nav-item avatar dropdown">
+                        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink-55" data-toggle="dropdown"
+                          aria-haspopup="true" aria-expanded="false">
+                          <img src="https://mdbootstrap.com/img/Photos/Avatars/avatar-2.jpg" class="rounded-circle z-depth-0"
+                            alt="avatar image">
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-lg-right dropdown-secondary"
+                          aria-labelledby="navbarDropdownMenuLink-55">
+                          {% if user.is_authenticated %}
+                            <a class="dropdown-item" href="{% url 'profile' %}">Profile</a>
+                            <a class="dropdown-item" id="sup_token" href="{% url 'logout' %}">Log Out</a>
+                          {% else %}
+                            <a class="dropdown-item" href="{% url 'register' %}">Register</a>
+                            <a class="dropdown-item" href="{% url 'login' %}">Log in</a>
+                            <span id="sup_token"> </span>
+                          {% endif %}
+                        </div>
+                      </li>
+                  </ul>
+            </div>
+          </div>
+      </nav>
+      
+    </header>
+    <main class="container">
+    {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+      </main>
+​   {% if request.path == '/' %}
+<div class="container">
+  <div class="row-filtre">
+      <div class="column">
+        <div class="form-group">
+          <select class="form-control" id="sel1">
+            <option disabled selected value>Trier par</option>
+            <option>name</option>
+            <option>rate</option>
+            <option>release</option>
+          </select>
+        </div>
+      </div>
+      <div class="column">
+          <div class="form-group">
+              <select class="form-control" id="genre">
+                <option disabled selected value>Genre</option>
+                <option>ALL</option>
+                {% if genre %}
+                  {% for g in genre %}
+                    <option>{{ g }}</option>
+                  {% endfor %}
+                {% endif %}
+              </select>
+          </div>
+      </div>
+      <div class="column">
+          <div class="form-group">
+              <select class="form-control" id="notes">
+                <option disabled selected value>Notes</option>
+                <option>ALL</option>
+                <option>0-3</option>
+                <option>3-7</option>
+                <option>7-10</option>
+              </select>
+          </div>
+      </div>
+      <div class="column">
+          <div class="form-group">
+              <select class="form-control" id="dates">
+                <option disabled selected value>Production</option>
+                <option>ALL</option>
+                <option>1970-1980</option>
+                <option>1980-1990</option>
+                <option>1990-2000</option>
+                <option>2000-2020</option>
+              </select>
+          </div>
+      </div>
+  </div>
+  {% endif %}
+  {% if request.path == '/search/' %}
+  <div class="container">
+    <div class="row-filtre">
+        <div class="column">
+          <div class="form-group">
+            <select class="form-control" id="sel1S">
+              <option disabled selected value>Trier par</option>
+              <option>name</option>
+              <option>rate</option>
+              <option>release</option>
+            </select>
+          </div>
+        </div>
+        <div class="column">
+            <div class="form-group">
+                <select class="form-control" id="genreS">
+                  <option disabled selected value>Genre</option>
+                  <option>ALL</option>
+                  {% if genre %}
+                    {% for g in genre %}
+                      <option>{{ g }}</option>
+                    {% endfor %}
+                  {% endif %}
+                </select>
+            </div>
+        </div>
+        <div class="column">
+            <div class="form-group">
+                <select class="form-control" id="notesS">
+                  <option disabled selected value>Notes</option>
+                  <option>ALL</option>
+                  <option>0-3</option>
+                  <option>3-7</option>
+                  <option>7-10</option>
+                </select>
+            </div>
+        </div>
+        <div class="column">
+            <div class="form-group">
+                <select class="form-control" id="datesS">
+                  <option disabled selected value>Production</option>
+                  <option>ALL</option>
+                  <option>1970-1980</option>
+                  <option>1980-1990</option>
+                  <option>1990-2000</option>
+                  <option>2000-2020</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    {%endif%}
+        {% block content %}{% endblock %}
+​
+  <footer>
+    <div class="container">
+      <p>© elgrusko | yvmartor | themarch</p>
+    </div>
+  </footer>
+​
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/4d46cc5d9b.js" crossorigin="anonymous"></script>
+    <script type="text/javascript"> window.CSRF_TOKEN = "{{ csrf_token }}"; </script>
+    <script src="{% static 'js/search.js' %}"></script>
+      <script>
+              $token_vide = 0;
+              document.getElementById("sup_token").addEventListener("click", function () {
+                  var resp = {
+                      'tok': $token_vide
+                  };
+                  $token_vide = 1;
+                  $.ajax({
+                      type: 'POST',
+                      url: `${window.location}`,
+                      data: {csrfmiddlewaretoken: window.CSRF_TOKEN, 'tok': $token_vide},
+                      success: function (data) {
+                          // console.log($value)
+                      }
+                  });
+              })
+      </script>
+  </body>
+</html>

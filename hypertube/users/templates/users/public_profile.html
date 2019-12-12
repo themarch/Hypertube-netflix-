@@ -1,0 +1,35 @@
+
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <div class="content-section">
+      <div class="media">
+        <img class="rounded-circle account-img" src="{{ photo }}">
+        <div class="media-body">
+          <h4 class="public">LOGIN </h4>
+          <h3 class="public1"> {{ super_username}} </h3>
+          {% if firstname == 0 %}
+            <h4 class="public">PRÉNOM</h4>
+            <h3 class="public1"> {{ super_firstname}} </h3>
+          {% endif %}
+          {% if lastname == 0 %}
+            <h4 class="public">NOM</h4>
+            <h3 class="public1"> {{ super_lastname}} </h3>
+          {% endif %}
+          {% if rien == 0 %}
+            <h3 class="public">FILM VUES </h3>
+         {% endif %}
+          {% for toto in film%}
+            <u id="help"> {{toto}} </u> <br />
+         {% endfor %}
+        </div>
+      </div>
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <fieldset class="form-group register-group">
+        </fieldset>
+        <div class="form-group register-group">
+        </div>
+      </form>
+    </div>
+{% endblock content %}

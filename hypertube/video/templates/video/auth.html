@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% block content %}
+{% if user.username %}
+<div class="container">
+    <div class="content-section ">
+        <h3 style="color:red;">You are already connected</h3>
+    </div>
+</div>
+{% else %}
+    <div class="container">
+        <div class="content-section ">
+            <form method="POST" action="https://api.intra.42.fr/oauth/token">
+                {% csrf_token %}
+                <fieldset class="form-group register-group">
+                    <legend class="border-bottom mb-4">Auth</legend>
+                    {{ form|crispy }}
+                </fieldset>
+                <div class="form-group register-group">
+                    <button class="btn btn-danger" type="submit">Sign In</button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endif %}
+{% endblock content %}
