@@ -1,5 +1,11 @@
 # Hypertube-netflix
-    Pour lancer : cd hypertube && python3 manage.py runserver
+
+Techno utilisés : 
+	
+	Python / Django / bootstrap
+	Le player est fait en NodeJs
+
+	Pour lancer : cd hypertube && python3 manage.py runserver
     Puis, dans un autre terminal : cd test-express && nodemon index.js
 	
 	En cas d'erreur, veuillez à bien installer tout les modules python nécessaire (pip3 install ..)
