@@ -76,7 +76,7 @@ app.get('/playserie', function(req, res) {
         try {
             console.log(row.token)
         }
-        catch (err) {
+        catch (ERR_HTTP_HEADERS_SENT) {
             return res.redirect('http://localhost:8000')
             res.end() 
         }
@@ -129,7 +129,7 @@ app.get('/playserie', function(req, res) {
         console.error(err);
       }
       try {
-        vid = db.get("SELECT `episodes` FROM video_torrent WHERE `idimdb`= ? ", [film], function(err, row) { //proteger, crash en cas d'error
+        vid = db.get("SELECT `episodes` FROM video_torrent WHERE `idimdb`= ? ", [film], function(err, row) { 
             try {
                 suite = film + '_s' + season + '_e' + episode
                 search = JSON.parse(row.episodes)
@@ -194,13 +194,13 @@ app.get('/playserie', function(req, res) {
                     });
                 });
                 }
-        catch {
+        catch (ERR_HTTP_HEADERS_SENT){
             return res.redirect('http://localhost:8000')
             res.end() 
         }
         });
     }
-    catch (err) {
+    catch (ERR_HTTP_HEADERS_SENT) {
         res.redirect('http://localhost:8000')
     }
     })
@@ -216,7 +216,7 @@ app.get('/play', function toto(req, res) {
         try {
             console.log(row.token)
         }
-        catch (err) {
+        catch (ERR_HTTP_HEADERS_SENT) {
             return res.redirect('http://localhost:8000')
             res.end() 
         }
@@ -316,7 +316,7 @@ app.get('/play', function toto(req, res) {
                 });
             });
         }
-        catch (err) {
+        catch (ERR_HTTP_HEADERS_SENT) {
             return res.redirect('http://localhost:8000')
             res.end() 
         }
