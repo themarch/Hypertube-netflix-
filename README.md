@@ -8,7 +8,7 @@ Technos utilisées :
 	Pour lancer : cd hypertube && python3 manage.py runserver
     Puis, dans un autre terminal : cd test-express && nodemon index.js
 	
-	En cas d'erreur, veillez à bien installer tout les modules python nécessaires (pip3 install ..)
+	En cas d'erreur, veillez à bien installer tous les modules python nécessaires (pip3 install ..)
 	Et en cas d'erreur sur le premier terminal, (npm install ...)
 ​
 Ensuite, dans un navigateur :
