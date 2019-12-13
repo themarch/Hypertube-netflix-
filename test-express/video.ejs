@@ -1,0 +1,93 @@
+<script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="https://kit.fontawesome.com/4d46cc5d9b.js" crossorigin="anonymous"></script>
+<head>
+    <link rel="shortcut icon" type="image/png" href='/hypertube/static/logo/favicon.ico'/>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+      <title>Player</title>
+    </head>
+<style> 
+        body {
+            background: rgb(20,20,20);
+        }
+        .bg-steel {
+            background: rgb(11,11,11);
+            background: linear-gradient(180deg, rgba(11,11,11,1) 0%, rgba(20,20,20,1) 100%);
+        }
+        video {
+            max-height: 1100px;
+        }
+        #videoPlayer {
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        </style>
+
+<!DOCTYPE html>
+<html>   
+<header class="site-header">
+        <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
+          <div class="container">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation"> 
+            <span class="navbar-toggler-icon"></span>
+            </button>
+            <a href="http://localhost:8000/"><img src="https://fontmeme.com/permalink/191028/f17af05d35e163edc632c92a2e1e32fc.png" alt="netflix-font" border="0"></a>
+            <div class="collapse navbar-collapse" id="navbarToggle">
+              <div class="navbar-nav mr-auto">          
+              </div>
+              <!-- Navbar Right Side -->
+              <div class="navbar-nav">
+                  <ul class="navbar-nav ml-auto nav-flex-icons">
+                      <li class="nav-item avatar dropdown">
+                          <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink-55" data-toggle="dropdown"
+                            aria-haspopup="true" aria-expanded="false">
+                            <img src="https://mdbootstrap.com/img/Photos/Avatars/avatar-2.jpg" class="rounded-circle z-depth-0"
+                              alt="avatar image">
+                          </a>
+                          <div class="dropdown-menu dropdown-menu-lg-right dropdown-secondary"
+                            aria-labelledby="navbarDropdownMenuLink-55">
+                              <a class="dropdown-item" href="http://localhost:8000/login/profile/">Profile</a>
+                              <a class="dropdown-item" id="sup_token" href="http://localhost:8000/logout/">Log Out</a>
+                          </div>
+                        </li>
+                    </ul>
+              </div>
+            </div>
+        </nav>
+        
+      </header>
+
+      <body> 
+    <div class="embed-responsive embed-responsive-16by9">
+        <video id="videoPlayer" class="watch" controls autoplay poster="https://storage.googleapis.com/afs-prod/media/media:2c6e3ed4b86a4e7691839f1d39faf3d6/800.jpeg" >
+            <source class="stp" src="<%= base %>" type="<%= exty %>">
+            <% for(var i=0; i < files.length; i++) {%>
+            <track label="<%= files[i][2] %>" kind="subtitles" srclang="<%= files[i][2] %>" src="subtitles/<%= files[i][0] %>/<%= files[i][2] %>">
+            <%}%> 
+        </video>
+        </div>
+              
+</body>
+
+<script>
+    $token_vide = 0;
+    document.getElementById("sup_token").addEventListener("click", function () {
+        var resp = {
+            'tok': $token_vide
+        };
+        $token_vide = 1;
+        console.log(window.location.href)
+        $.ajax({
+            type: 'POST',
+            url: `${window.location}`,
+            data: {csrfmiddlewaretoken: window.CSRF_TOKEN, 'tok': $token_vide},
+            success: function (data) {
+                // console.log($value)
+            }
+        });
+    })
+</script>
+
+</html>

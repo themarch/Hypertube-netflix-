@@ -57,7 +57,8 @@ var j = schedule.scheduleJob('0 4 * * *', function(){ // tous les jours a 4h du 
     });
 });
 
-app.use(express.static('video'));
+
+
 
 app.get('/', function(req, res) {
     return res.redirect('http://localhost:8000');
@@ -69,7 +70,22 @@ app.get('/playserie', function(req, res) {
     lang = req.query.lang
     season = req.query.season
     episode = req.query.episode
+    token1 = req.query.tok
     vttname = 'subtitles/' + film + '_s' + season +  '_e' + episode + '_' + lang + '.vtt'
+    tok1 = db.get("SELECT `token` FROM users_profile WHERE `token`= ?", [token1], function(err, row) {
+        try {
+            console.log(row.token)
+        }
+        catch (err) {
+            return res.redirect('http://localhost:8000')
+            res.end() 
+        }
+
+    });
+    if (lang != 'fr' && lang != 'en' && lang != 'it') {
+        return res.redirect('http://localhost:8000')
+        res.end() 
+    }
     if(!fs.existsSync(vttname)){
         const out = fs.createWriteStream(vttname);
         OS.search({
@@ -112,41 +128,56 @@ app.get('/playserie', function(req, res) {
         // An error occurred
         console.error(err);
       }
-      vid = db.get("SELECT `episodes` FROM video_torrent WHERE `idimdb`= ? ", [film], function(err, row) {
-        try {
-            suite = film + '_s' + season + '_e' + episode
-            search = JSON.parse(row.episodes)
-            for(var i = 0; i < search.length; i++ ){
-                if (search[i]['episode'] == episode && search[i]['season'] == season){
-                    vid = search[i]['torrents']['0']['url']
-                    break;
+      try {
+        vid = db.get("SELECT `episodes` FROM video_torrent WHERE `idimdb`= ? ", [film], function(err, row) { //proteger, crash en cas d'error
+            try {
+                suite = film + '_s' + season + '_e' + episode
+                search = JSON.parse(row.episodes)
+                for(var i = 0; i < search.length; i++ ){
+                    if (search[i]['episode'] == episode && search[i]['season'] == season){
+                        vid = search[i]['torrents']['0']['url']
+                        break;
 
+                    }
                 }
-            }
-            console.log(vid)
-            var pa = './video/' + suite
-            console.log(pa)
-            const engine = torrentStream(vid)
-            engine.on('ready', function(){
-                engine.files.forEach(function (file, idx) {
-                    const ext = path.extname(file.name).slice(1);
-                    console.log(ext)
-                    if (ext === 'mkv' || ext === 'mp4') {
-        
-                        file.ext = ext;
-                        current = pa + '/' + file.path
-                        console.log(current)
-                        try{
-                            const stats = fs.statSync(current);
-                            console.log(stats)
-                            const fileSizeInBytes = stats.size;
-                            console.log(fileSizeInBytes)
-                            console.log(file.length)
-                            if (fileSizeInBytes == file.length){
-                                console.log('boulou')
-                                base = film + '_s' + season + '_e' + episode +  '/' + file.path
-                                console.log(base)
-                                console.log(pa)
+                console.log(vid)
+                var pa = './video/' + suite
+                console.log(pa)
+                const engine = torrentStream(vid)
+                engine.on('ready', function(){
+                    engine.files.forEach(function (file, idx) {
+                        const ext = path.extname(file.name).slice(1);
+                        console.log(ext)
+                        if (ext === 'mkv' || ext === 'mp4') {
+            
+                            file.ext = ext;
+                            current = pa + '/' + file.path
+                            console.log(current)
+                            try{
+                                const stats = fs.statSync(current);
+                                console.log(stats)
+                                const fileSizeInBytes = stats.size;
+                                console.log(fileSizeInBytes)
+                                console.log(file.length)
+                                if (fileSizeInBytes == file.length){
+                                    console.log('boulou')
+                                    base = film + '_s' + season + '_e' + episode +  '/' + file.path
+                                    console.log(base)
+                                    console.log(pa)
+                                    console.log(ext)
+                                    if (ext == 'mkv'){
+                                        exty = 'video/mp4'
+                                    }
+                                    else if (ext == 'mp4'){
+                                        exty = 'video/mp4'
+                                    }
+                                    res.render(path.join(__dirname + '/video.ejs'), {base : base, film : film, lang : lang, files : p, exty : exty })
+                                }
+
+                            } 
+                            catch (err) {
+                                console.log(err.code)
+                                if (err.code === 'ENOENT'){
                                 console.log(ext)
                                 if (ext == 'mkv'){
                                     exty = 'video/mp4'
@@ -154,35 +185,24 @@ app.get('/playserie', function(req, res) {
                                 else if (ext == 'mp4'){
                                     exty = 'video/mp4'
                                 }
-                                res.render(path.join(__dirname + '/video.ejs'), {base : base, film : film, lang : lang, files : p, exty : exty })
+                                base = 'http://localhost:3000/SERIE?film=' + film + '&season=' + season + '&episode=' + episode + '&lang=' + lang 
+                                    res.render(path.join(__dirname + '/video.ejs'), {base : base, film : film, lang : lang, files : p, exty : exty })
+                                }  
                             }
-
-                        } 
-                        catch (err) {
-                            console.log(err.code)
-                            if (err.code === 'ENOENT'){
-                            console.log(ext)
-                            if (ext == 'mkv'){
-                                exty = 'video/mp4'
-                            }
-                            else if (ext == 'mp4'){
-                                exty = 'video/mp4'
-                            }
-                            base = 'http://localhost:3000/SERIE?film=' + film + '&season=' + season + '&episode=' + episode + '&lang=' + lang 
-                                res.render(path.join(__dirname + '/video.ejs'), {base : base, film : film, lang : lang, files : p, exty : exty })
-                            }  
+            
                         }
-        
-                    }
+                    });
                 });
-            });
-            }
-    catch {
-        return res.redirect('http://localhost:8000')
-        res.end() 
+                }
+        catch {
+            return res.redirect('http://localhost:8000')
+            res.end() 
+        }
+        });
     }
-    }); // M
-    
+    catch (err) {
+        res.redirect('http://localhost:8000')
+    }
     })
 
 

@@ -377,6 +377,11 @@ def serie(request, title):
             bd_already.already = bd_already.already + title + ' '
             bd_already.save()
     lang = request.user.pk
+    name = request.user
+    id_profile = User.objects.get(username=name).pk
+    token = Profile.objects.get(id=id_profile)
+    token.token = uuid.uuid4().hex[:12].upper()
+    token.save()
     toto = Profile.objects.only('language').get(id=lang).language
     torrent = Torrent.objects.get(pk=title)
     infos = json.loads(torrent.episodes)
@@ -395,7 +400,13 @@ def serie(request, title):
     saison.sort()
     cat = json.loads(torrent.category)
     cat = cat['category']
-    return render(request, 'video/serie.html', {'toto' : toto, 'infos' : infos, 'season' : saison, 'title' : title, 'torrent' : torrent, 'cat' : cat, 'grey' : grey,})
+    if request.method == 'POST' and 'tok' in request.POST:
+        name = request.user
+        id_profile = User.objects.get(username=name).pk
+        token = Profile.objects.get(id=id_profile)
+        token.token = ''
+        token.save()
+    return render(request, 'video/serie.html', {'tok': token.token, 'toto' : toto, 'infos' : infos, 'season' : saison, 'title' : title, 'torrent' : torrent, 'cat' : cat, 'grey' : grey,})
 
 @login_required
 def watch_serie(request, title, season, episode):
