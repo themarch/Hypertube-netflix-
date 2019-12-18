@@ -40,7 +40,7 @@
                       {% if mov.id in grey %}
                         <a href="{% url 'tittle_video' tittle=mov.id %}"><img class="gris1234" src="{{mov.miniature}}" alt="{{mov.name}}" style="width:100%; filter: grayscale(1) blur(3px);"></a>
                       {% else %}
-                        <a href="{% url 'tittle_video' tittle=mov.id %}"><img class="gris1234" src="{{mov.miniature}}" alt="{{mov.name}}" style="width:100%;"></a>
+                        <a href="{% url 'tittle_video' tittle=mov.id %}"><img id="toto" class="gris1234" src="{{mov.miniature}}" alt="{{mov.name}}" style="width:100%;"></a>
                       {% endif %}
                     {% else %}
                     {% if mov.id in grey %}
@@ -59,11 +59,53 @@
               </div>
             {% endfor %}
   </div>
+  <div id="movieList">
+<p style='color: black;'>Movie 1</p>
+</div>
   {% endif %}
   
   <!-- END GRID -->
   
   <!-- END MAIN -->
-  </div>
-    </main>
+</main>
+<script>
+window.onscroll = function(ev) {
+    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+       //User is currently at the bottom of the page
+        addNewItem();
+    }
+};
+
+
+function addNewItem(){
+   var itemCount = document.getElementById("movieList").childElementCount;
+const itemLimit = 10; //total number of items to retrieve
+//retrieve the next list of items from wherever
+var nextTopItems = getNextItemSimulator(itemCount); 
+nextTopItems.forEach(function(item) {
+//add the items to your view
+  document.getElementById("movieList").innerHTML += "<p style='color: black;'>"+item+"</p>"; 
+});
+
+function getNextItemSimulator(currentItem){ 
+   //Just some dummy data to simulate an api response
+const dummyItemCount = 400;
+var dummyItems = []; 
+var nextTopDummyItems = [];
+for(i = 1; i <= dummyItemCount; i++){
+//add to main dummy list
+    dummyItems.push("Movie " + i);
+}
+var countTen = 10;
+var nextItem = currentItem + 1;
+for(i = nextItem; i <= dummyItems.length; i++){
+    //get next 10 records from dummy list
+    nextTopDummyItems.push(dummyItems[i - 1]);
+    countTen--;
+    if(countTen == 0)break;
+}
+   return nextTopDummyItems;
+}
+}
+</script>
     {% endblock content %}

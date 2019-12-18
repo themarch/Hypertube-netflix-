@@ -477,3 +477,7 @@ hr{
     font-size: 21px;
   }
 }
+
+.to_supp {
+  display: none;
+}
