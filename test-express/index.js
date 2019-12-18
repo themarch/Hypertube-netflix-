@@ -72,6 +72,8 @@ app.get('/playserie', function(req, res) {
         season = req.query.season
         episode = req.query.episode
         token1 = req.query.tok
+        if (lang == undefined)
+            return res.redirect('http://localhost:8000')
         vttname = 'subtitles/' + film + '_s' + season +  '_e' + episode + '_' + lang + '.vtt'
         if (film.length != 9)
             return res.redirect('http://localhost:8000')
@@ -88,10 +90,6 @@ app.get('/playserie', function(req, res) {
                 res.end() 
             }
         });
-        if (lang != 'fr' && lang != 'en' && lang != 'it') {
-            return res.redirect('http://localhost:8000')
-            res.end() 
-        }
         if(!fs.existsSync(vttname)){
             const out = fs.createWriteStream(vttname);
             OS.search({
@@ -241,6 +239,8 @@ app.get('/play', function toto(req, res) {
         lang = req.query.lang
         token1 = req.query.tok
         console.log('TOKEN1 = ' + token1)
+        if (lang == undefined)
+            return res.redirect('http://localhost:8000')  
         if (token1 == undefined)
             return res.redirect('http://localhost:8000')   
         if (token1 == '')
@@ -257,10 +257,6 @@ app.get('/play', function toto(req, res) {
             }
 
         });
-        if (lang != 'fr' && lang != 'en' && lang != 'it') {
-            return res.redirect('http://localhost:8000')
-            res.end() 
-        }
         vttname = 'subtitles/' + film + '_' + lang + '.vtt'
         console.log('------------------------------------2')
         if (!fs.existsSync(vttname)){
@@ -577,13 +573,13 @@ app.get('/SERIE', function (req, res) {
 app.use('/subtitles/:idimdb/:lang', function(req, res){
     console.log('polo')
     var filename = __dirname+req.url;
-
     // This line opens the file as a readable stream
     add = 'subtitles/' + req.params.idimdb
     var readStream = fs.createReadStream(add);
   
     // This will wait until we know the readable stream is actually valid before piping
     readStream.on('open', function () {
+    //req.setHeader('Content-Type', 'text/plain')
       // This just pipes the read stream to the response object (which goes to the client)
       readStream.pipe(res);
     });
@@ -596,7 +592,6 @@ app.use('/subtitles/:idimdb/:lang', function(req, res){
 })
 
 app.get('/movie', function(req, res) {
-    
     res.sendFile(path.join(__dirname + '/movie.ejs'))
     })
 

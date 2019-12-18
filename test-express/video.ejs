@@ -64,7 +64,7 @@
         <video id="videoPlayer" class="watch" controls autoplay poster="https://storage.googleapis.com/afs-prod/media/media:2c6e3ed4b86a4e7691839f1d39faf3d6/800.jpeg" >
             <source class="stp" src="<%= base %>" type="<%= exty %>">
             <% for(var i=0; i < files.length; i++) {%>
-            <track label="<%= files[i][2] %>" kind="subtitles" srclang="<%= files[i][2] %>" src="subtitles/<%= files[i][0] %>/<%= files[i][2] %>">
+            <track label="<%= files[i][2] %>" kind="captions" srclang="<%= files[i][2] %>" src="subtitles/<%= files[i][0] %>/<%= files[i][2] %>">
             <%}%> 
         </video>
         </div>
