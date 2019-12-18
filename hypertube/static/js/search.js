@@ -13,7 +13,7 @@ function display_film(data){
                    '<a href="http://localhost:8000/video/' + element[0] + '"><img class="gris1234" src="'+ element[3] + '" alt="' + element[1] + '" style="width:100%"></a>'
                 } else {
                   sort = sort +
-                  '<a href=" + http://localhost:8000/serie/' + element[0] + '"><img class="gris1234"\ src="' + element[3] + '" alt="' + element[1] + '" style="width:100%"></a>'
+                  '<a href="http://localhost:8000/video/serie/' + element[0] + '"><img class="gris1234"\ src="' + element[3] + '" alt="' + element[1] + '" style="width:100%"></a>'
                 }
               sort = sort + 
               '<button class="button button3">View Details</button>\

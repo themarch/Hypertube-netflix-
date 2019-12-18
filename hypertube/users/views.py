@@ -187,12 +187,14 @@ def list_user(request):
     nb_id = len(username)
     ind = 1
     tab = []
-    while (ind != nb_id + 1):
-        tab.append(Profile.objects.get(id=ind).image)
-        ind = ind + 1
+    username = list(username)
+    for toto in username:
+        tab.append([toto.username])
+    for toto in tab:
+        peour = User.objects.get(username=toto[0]).pk
+        toto.append(Profile.objects.get(id=peour).image)
     context = {
         'tab' : tab,
-        'user': username
     }
     return render(request, 'users/list_user.html', context)
 

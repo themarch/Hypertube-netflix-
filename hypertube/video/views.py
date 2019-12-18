@@ -254,6 +254,12 @@ def video(request, tittle):
             token = Profile.objects.get(id=id_profile)
             token.token = uuid.uuid4().hex[:12].upper()
             token.save()
+            bd_already = Profile.objects.filter(id=id_profile).first()
+            toto = bd_already.already
+            tata = bd_already.already.strip().split(' ')
+            if tittle not in tata:
+                bd_already.already = bd_already.already + tittle + ' '
+                bd_already.save()
             ids = Torrent.objects.get(pk=tittle).idimdb
             lang = request.user.pk
             toto = Profile.objects.only('language').get(id=lang).language
@@ -261,14 +267,6 @@ def video(request, tittle):
             inf = {'ids' : ids, 'lan' : toto, 'token' : token.token}
             return JsonResponse({'infos' : inf })
         grey = 0
-        count = request.POST.get('yeah')
-        if request.method == 'POST' and 'yeah' in request.POST:
-            name = request.user
-            id_profile = User.objects.get(username=name).pk
-            bd_already = Profile.objects.filter(id=id_profile).first()
-            if tittle not in bd_already.already:
-                bd_already.already = bd_already.already + tittle + ' '
-                bd_already.save()
         inshalah = request.POST.get('tok')
         if request.method == 'POST' and 'tok' in request.POST:
             name = request.user
@@ -369,12 +367,13 @@ def serie(request, title):
         return redirect('/')
     grey = 0
     count = request.POST.get('yeah')
-    print(count)
-    if (request.method == 'POST' and 'yeah' in request.POST):
+    if (request.method == 'POST' and 'pal' in request.POST):
         name = request.user
         id_profile = User.objects.get(username=name).pk
         bd_already = Profile.objects.filter(id=id_profile).first()
-        if title not in bd_already.already:
+        toto = bd_already.already
+        tata = bd_already.already.strip().split(' ')
+        if title not in tata:
             bd_already.already = bd_already.already + title + ' '
             bd_already.save()
     lang = request.user.pk

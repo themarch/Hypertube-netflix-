@@ -471,3 +471,9 @@ hr{
 .public {
   color: grey;
 }
+
+@media screen and (min-width: 200px) {
+  .titre {
+    font-size: 21px;
+  }
+}

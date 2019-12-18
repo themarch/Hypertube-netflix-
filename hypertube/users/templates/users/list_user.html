@@ -64,15 +64,18 @@
     <div class="content-section">
       <div class="media">
         <div class="media-body">
-          <h2 class="account-heading">{{ user.username }}</h2>
-         <p class="text-secondary">{{ user.email }}</p>
         </div>
       </div>
         <fieldset class="form-group register-group">
             <legend class="border-bottom mb-4">Liste des utilisateurs</legend>
-        {% for image in tab %} 
-           <img class="rounded-circle account-img" src="/media/{{ image }}"> {{forloop.counter0.user}} <br />
+        {% for image in tab %}
+        <div class="row">
+          <div class="col"> 
+           <img class="rounded-circle account-img" src="/media/{{ image.1 }}"> {{ image.0 }} <br />
+           </div>
+           </div>
         {% endfor %}
+
         </fieldset>
     </div>
 

@@ -64,24 +64,7 @@
             elem.addEventListener("click", function(){editSize(elem, "85px")}, false);
         </script>
         <script>document.getElementsByTagName('textarea')[0].setAttribute('placeholder', 'Please be constructive !');</script>
-<script>
-$value = 0;
-document.getElementById("watch").addEventListener("click", function(){
-        document.querySelector(".image_video").style = 'filter:grayscale(1);'
-        var resp = {
-            'yeah': $value
-        };
-        $value = 1;
-        $.ajax({
-          type: 'POST',
-          url: `${window.location}`,
-          data: {csrfmiddlewaretoken: window.CSRF_TOKEN, 'yeah' : $value},
-          success: function(data){
-             // console.log($value)
-          }
-    });
-})
-</script>
+
     <script src="{% static 'js/player.js' %}"></script>
     </main>
   {% endblock %}

@@ -1,4 +1,5 @@
 document.getElementById("watch").addEventListener("click", function(event){
+        document.querySelector(".image_video").style = 'filter:grayscale(1);'
         event.stopPropagation();
         var resp = {
             'pal': 'pal'
