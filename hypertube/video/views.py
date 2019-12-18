@@ -15,9 +15,10 @@ from django.db.models import Q, query
 from users.models import Profile
 import uuid
 
-@login_required
 def list(request):
     #get token to 42
+    if not 'code' in request.GET and int(request.user.is_authenticated) == 0:
+        return redirect('login')
     if request.GET.get('code'):
         code = request.GET.get('code')
         data = {'grant_type': 'authorization_code', 'client_id': '5123688fe53d089acd8fb1f9bf1bd437e8d4f3628dc5d79b033b357deafbb01a', 'client_secret': '3ede04d9a435c18f69ae2c9e0e91fc486c38349327418f49e7b6910da663903b', 'code': code, 'redirect_uri': 'http://localhost:8000'}

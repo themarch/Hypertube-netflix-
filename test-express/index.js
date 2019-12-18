@@ -66,88 +66,253 @@ app.get('/', function(req, res) {
     })
 
 app.get('/playserie', function(req, res) {
-    film = req.query.film
-    lang = req.query.lang
-    season = req.query.season
-    episode = req.query.episode
-    token1 = req.query.tok
-    vttname = 'subtitles/' + film + '_s' + season +  '_e' + episode + '_' + lang + '.vtt'
-    tok1 = db.get("SELECT `token` FROM users_profile WHERE `token`= ?", [token1], function(err, row) {
-        try {
-            console.log(row.token)
-        }
-        catch (ERR_HTTP_HEADERS_SENT) {
+    try {
+        film = req.query.film
+        lang = req.query.lang
+        season = req.query.season
+        episode = req.query.episode
+        token1 = req.query.tok
+        vttname = 'subtitles/' + film + '_s' + season +  '_e' + episode + '_' + lang + '.vtt'
+        if (film.length != 9)
+            return res.redirect('http://localhost:8000')
+        console.log('TAILLE DU FILM = ' + film.length)
+        if (token1 == '')
+            return res.redirect('http://localhost:8000')
+        tok1 = db.get("SELECT `token` FROM users_profile WHERE `token`= ?", [token1], function(err, row) {
+            try {
+                console.log('MAIS OU EST LE TOKAN ' + row.token)
+
+            }
+            catch (ERR_HTTP_HEADERS_SENT) {
+                return res.redirect('http://localhost:8000')
+                res.end() 
+            }
+        });
+        if (lang != 'fr' && lang != 'en' && lang != 'it') {
             return res.redirect('http://localhost:8000')
             res.end() 
         }
-
-    });
-    if (lang != 'fr' && lang != 'en' && lang != 'it') {
-        return res.redirect('http://localhost:8000')
-        res.end() 
-    }
-    if(!fs.existsSync(vttname)){
-        const out = fs.createWriteStream(vttname);
-        OS.search({
-            imdbid: film,
-            season: season,
-            episode: episode,
-            sublanguageid: lang,
-            gzip: true
-        }).then(subtitles => {
-            if (lang in subtitles) {
-                require('request')({
-                    url: subtitles[lang]['vtt'],
-                    encoding: null
-                })
-                .pipe(out)
-            } else {
-                throw 'no subtitle found';
-            }
-        }).catch(console.error);
-        
-    }
-    try {
-        console.log('------------------------------------3')
-        files = fs.readdirSync('subtitles');
-        p = []
-        for (var i = 0; i < files.length; i++){
-            if (files[i].search(film) != -1){
-                tup = files[i].split('_')
-                console.log(tup)
-                console.log('tuuuuuuuuuup')
-                la = tup[3].split('.')
-                ep = '_s' + season + '_e' + episode + '_'
-                console.log(ep)
-                if (files[i].search(ep) != -1){
-                p.push([files[i], tup[0], la[0]])
+        if(!fs.existsSync(vttname)){
+            const out = fs.createWriteStream(vttname);
+            OS.search({
+                imdbid: film,
+                season: season,
+                episode: episode,
+                sublanguageid: lang,
+                gzip: true
+            }).then(subtitles => {
+                if (lang in subtitles) {
+                    require('request')({
+                        url: subtitles[lang]['vtt'],
+                        encoding: null
+                    })
+                    .pipe(out)
+                } else {
+                    throw 'no subtitle found';
                 }
-            }
+            }).catch(console.error);
+            
         }
-      } catch(err) {
-        // An error occurred
-        console.error(err);
-      }
-      try {
-        vid = db.get("SELECT `episodes` FROM video_torrent WHERE `idimdb`= ? ", [film], function(err, row) { 
-            try {
-                suite = film + '_s' + season + '_e' + episode
-                search = JSON.parse(row.episodes)
-                for(var i = 0; i < search.length; i++ ){
-                    if (search[i]['episode'] == episode && search[i]['season'] == season){
-                        vid = search[i]['torrents']['0']['url']
-                        break;
-
+        try {
+            console.log('------------------------------------3')
+            files = fs.readdirSync('subtitles');
+            p = []
+            for (var i = 0; i < files.length; i++){
+                if (files[i].search(film) != -1){
+                    tup = files[i].split('_')
+                    console.log(tup)
+                    console.log('tuuuuuuuuuup')
+                    if (tup[3] == undefined)
+                        return res.redirect('http://localhost:8000')
+                    la = tup[3].split('.')
+                    ep = '_s' + season + '_e' + episode + '_'
+                    console.log(ep)
+                    if (files[i].search(ep) != -1){
+                    p.push([files[i], tup[0], la[0]])
                     }
                 }
-                console.log(vid)
-                var pa = './video/' + suite
-                console.log(pa)
+            }
+        } catch(err) {
+            // An error occurred
+            console.error(err);
+        }
+        try {
+            vid = db.get("SELECT `episodes` FROM video_torrent WHERE `idimdb`= ? ", [film], function(err, row) {
+                try {
+                    console.log(row)
+                }
+                catch (err) {
+                    return res.redirect('http://localhost:8000')
+                }
+                try {
+                    suite = film + '_s' + season + '_e' + episode
+                    search = JSON.parse(row.episodes)
+                    for(var i = 0; i < search.length; i++ ){
+                        if (search[i]['episode'] == episode && search[i]['season'] == season){
+                            vid = search[i]['torrents']['0']['url']
+                            break;
+
+                        }
+                    }
+                    console.log(vid)
+                    var pa = './video/' + suite
+                    console.log(pa)
+                    const engine = torrentStream(vid)
+                    engine.on('ready', function(){
+                        engine.files.forEach(function (file, idx) {
+                            const ext = path.extname(file.name).slice(1);
+                            console.log(ext)
+                            if (ext === 'mkv' || ext === 'mp4') {
+                
+                                file.ext = ext;
+                                current = pa + '/' + file.path
+                                console.log(current)
+                                try{
+                                    const stats = fs.statSync(current);
+                                    console.log(stats)
+                                    const fileSizeInBytes = stats.size;
+                                    console.log(fileSizeInBytes)
+                                    console.log(file.length)
+                                    if (fileSizeInBytes == file.length){
+                                        console.log('boulou')
+                                        base = film + '_s' + season + '_e' + episode +  '/' + file.path
+                                        console.log(base)
+                                        console.log(pa)
+                                        console.log(ext)
+                                        if (ext == 'mkv'){
+                                            exty = 'video/mp4'
+                                        }
+                                        else if (ext == 'mp4'){
+                                            exty = 'video/mp4'
+                                        }
+                                        res.render(path.join(__dirname + '/video.ejs'), {base : base, film : film, lang : lang, files : p, exty : exty })
+                                    }
+
+                                } 
+                                catch (err) {
+                                    console.log(err.code)
+                                    if (err.code === 'ENOENT'){
+                                    console.log(ext)
+                                    if (ext == 'mkv'){
+                                        exty = 'video/mp4'
+                                    }
+                                    else if (ext == 'mp4'){
+                                        exty = 'video/mp4'
+                                    }
+                                    base = 'http://localhost:3000/SERIE?film=' + film + '&season=' + season + '&episode=' + episode + '&lang=' + lang 
+                                        res.render(path.join(__dirname + '/video.ejs'), {base : base, film : film, lang : lang, files : p, exty : exty })
+                                    }  
+                                }
+                
+                            }
+                        });
+                    });
+                    }
+            catch (ERR_HTTeP_HEADERS_SENT){
+                console.log('33333')
+                res.end() 
+            }
+            });
+        }
+        catch (ERR_HTTP_HEADERS_SENT) {
+            res.redirect('http://localhost:8000')
+        }
+    }
+    catch(ERR_HTTP_HEADERS_SENT) {
+        return res.redirect('http://localhost:8000')
+    }
+    let vide = ''
+    let data = [vide, token1];
+    let sql = `UPDATE users_profile
+            SET token = ?
+            WHERE token = ?`;
+    db.run(sql, data, function(err) {
+        if (err) {
+            return console.error(err.message);
+        }              
+    });
+    })
+
+
+app.get('/play', function toto(req, res) {
+    try {
+        console.log('------------------------------------1')
+        film = req.query.film
+        lang = req.query.lang
+        token1 = req.query.tok
+        console.log('TOKEN1 = ' + token1)
+        if (token1 == undefined)
+            return res.redirect('http://localhost:8000')   
+        if (token1 == '')
+            return res.redirect('http://localhost:8000')
+        tok1 = db.get("SELECT `token` FROM users_profile WHERE `token`= ?", [token1], function(err, row) {
+            try {
+                console.log('111111')
+                console.log(row.token)
+            }
+            catch (ERR_HTTP_HEADERS_SENT) {
+                console.log('22222')
+                return res.redirect('http://localhost:8000')
+                res.end() 
+            }
+
+        });
+        if (lang != 'fr' && lang != 'en' && lang != 'it') {
+            return res.redirect('http://localhost:8000')
+            res.end() 
+        }
+        vttname = 'subtitles/' + film + '_' + lang + '.vtt'
+        console.log('------------------------------------2')
+        if (!fs.existsSync(vttname)){
+            const out = fs.createWriteStream(vttname);
+            OS.search({
+                imdbid: film,
+                sublanguageid: lang,
+                gzip: true
+            }).then(subtitles => {
+                if (lang in subtitles) {
+                    console.log('Subtitle found:', subtitles);
+                    require('request')({
+                        url: subtitles[lang]['vtt'],
+                        encoding: null
+                    })
+                    .pipe(out)
+                } else {
+                    throw 'no subtitle found';
+                }
+            }).catch(console.error);
+
+        }
+        try {
+            console.log('------------------------------------3')
+            files = fs.readdirSync('subtitles');
+            p = []
+            for (var i = 0; i < files.length; i++){
+                if (files[i].search(film) != -1){
+                    tup = files[i].split('_')
+                    la = tup[1].split('.')
+                    p.push([files[i], tup[0], la[0]])
+                }
+            }
+            console.log(p)
+        } catch(err) {
+            // An error occurred
+            console.error(err);
+        }
+        vid = db.get("SELECT `magnets` FROM video_torrent WHERE `idimdb`= ? ", [film], function(err, row) {
+            try {
+                console.log(row)
+            }
+            catch (ERR_HTTP_HEADERS_SENT){
+                return res.redirect('http://localhost:8000')
+            }
+            try {
+                var vid = row.magnets
+                var pa = './video/' + film
                 const engine = torrentStream(vid)
                 engine.on('ready', function(){
                     engine.files.forEach(function (file, idx) {
                         const ext = path.extname(file.name).slice(1);
-                        console.log(ext)
                         if (ext === 'mkv' || ext === 'mp4') {
             
                             file.ext = ext;
@@ -161,16 +326,14 @@ app.get('/playserie', function(req, res) {
                                 console.log(file.length)
                                 if (fileSizeInBytes == file.length){
                                     console.log('boulou')
-                                    base = film + '_s' + season + '_e' + episode +  '/' + file.path
-                                    console.log(base)
-                                    console.log(pa)
-                                    console.log(ext)
                                     if (ext == 'mkv'){
                                         exty = 'video/mp4'
                                     }
                                     else if (ext == 'mp4'){
                                         exty = 'video/mp4'
                                     }
+                                    base = film + '/' + file.path
+                                    console.log(current)
                                     res.render(path.join(__dirname + '/video.ejs'), {base : base, film : film, lang : lang, files : p, exty : exty })
                                 }
 
@@ -178,159 +341,61 @@ app.get('/playserie', function(req, res) {
                             catch (err) {
                                 console.log(err.code)
                                 if (err.code === 'ENOENT'){
-                                console.log(ext)
+                                console.log('download')
                                 if (ext == 'mkv'){
                                     exty = 'video/mp4'
                                 }
                                 else if (ext == 'mp4'){
                                     exty = 'video/mp4'
                                 }
-                                base = 'http://localhost:3000/SERIE?film=' + film + '&season=' + season + '&episode=' + episode + '&lang=' + lang 
-                                    res.render(path.join(__dirname + '/video.ejs'), {base : base, film : film, lang : lang, files : p, exty : exty })
-                                }  
+                                base = 'http://localhost:3000/BDD?film=' + film + '&lang=' + lang 
+                                    res.render(path.join(__dirname + '/video.ejs'), {base : base, film : film, lang : lang, files : p , exty : exty})
+                                }
                             }
             
                         }
                     });
                 });
-                }
-        catch (ERR_HTTP_HEADERS_SENT){
-            return res.redirect('http://localhost:8000')
-            res.end() 
-        }
-        });
+            }
+            catch (ERR_HTTP_HEADERS_SENT) {
+                console.log('444444')
+                res.end() 
+            }
+        }); // M
     }
     catch (ERR_HTTP_HEADERS_SENT) {
-        res.redirect('http://localhost:8000')
-    }
-    })
-
-
-app.get('/play', function toto(req, res) {
-    console.log('------------------------------------1')
-    film = req.query.film
-    lang = req.query.lang
-    token1 = req.query.tok
-    console.log('TOKEN1 = ' + token1)
-    tok1 = db.get("SELECT `token` FROM users_profile WHERE `token`= ?", [token1], function(err, row) {
-        try {
-            console.log(row.token)
-        }
-        catch (ERR_HTTP_HEADERS_SENT) {
-            return res.redirect('http://localhost:8000')
-            res.end() 
-        }
-
-    });
-    if (lang != 'fr' && lang != 'en' && lang != 'it') {
+        console.log('555555')
         return res.redirect('http://localhost:8000')
-        res.end() 
     }
-    vttname = 'subtitles/' + film + '_' + lang + '.vtt'
-    console.log('------------------------------------2')
-    if (!fs.existsSync(vttname)){
-        const out = fs.createWriteStream(vttname);
-        OS.search({
-            imdbid: film,
-            sublanguageid: lang,
-            gzip: true
-        }).then(subtitles => {
-            if (lang in subtitles) {
-                console.log('Subtitle found:', subtitles);
-                require('request')({
-                    url: subtitles[lang]['vtt'],
-                    encoding: null
-                })
-                .pipe(out)
-            } else {
-                throw 'no subtitle found';
-            }
-        }).catch(console.error);
-
-    }
-    try {
-        console.log('------------------------------------3')
-        files = fs.readdirSync('subtitles');
-        p = []
-        for (var i = 0; i < files.length; i++){
-            if (files[i].search(film) != -1){
-                tup = files[i].split('_')
-                la = tup[1].split('.')
-                p.push([files[i], tup[0], la[0]])
-            }
-        }
-        console.log(p)
-      } catch(err) {
-        // An error occurred
-        console.error(err);
-      }
-      vid = db.get("SELECT `magnets` FROM video_torrent WHERE `idimdb`= ? ", [film], function(err, row) {
-        try {
-            var vid = row.magnets
-            var pa = './video/' + film
-            const engine = torrentStream(vid)
-            engine.on('ready', function(){
-                engine.files.forEach(function (file, idx) {
-                    const ext = path.extname(file.name).slice(1);
-                    if (ext === 'mkv' || ext === 'mp4') {
-        
-                        file.ext = ext;
-                        current = pa + '/' + file.path
-                        console.log(current)
-                        try{
-                            const stats = fs.statSync(current);
-                            console.log(stats)
-                            const fileSizeInBytes = stats.size;
-                            console.log(fileSizeInBytes)
-                            console.log(file.length)
-                            if (fileSizeInBytes == file.length){
-                                console.log('boulou')
-                                if (ext == 'mkv'){
-                                    exty = 'video/mp4'
-                                }
-                                else if (ext == 'mp4'){
-                                    exty = 'video/mp4'
-                                }
-                                base = film + '/' + file.path
-                                console.log(current)
-                                res.render(path.join(__dirname + '/video.ejs'), {base : base, film : film, lang : lang, files : p, exty : exty })
-                            }
-
-                        } 
-                        catch (err) {
-                            console.log(err.code)
-                            if (err.code === 'ENOENT'){
-                            console.log('download')
-                            if (ext == 'mkv'){
-                                exty = 'video/mp4'
-                            }
-                            else if (ext == 'mp4'){
-                                exty = 'video/mp4'
-                            }
-                            base = 'http://localhost:3000/BDD?film=' + film + '&lang=' + lang 
-                                res.render(path.join(__dirname + '/video.ejs'), {base : base, film : film, lang : lang, files : p , exty : exty})
-                            }
-                        }
-        
-                    }
-                });
-            });
-        }
-        catch (ERR_HTTP_HEADERS_SENT) {
-            return res.redirect('http://localhost:8000')
-            res.end() 
-        }
-    }); // M
-    
+    let vide = ''
+    let data = [vide, token1];
+    let sql = `UPDATE users_profile
+            SET token = ?
+            WHERE token = ?`;
+    db.run(sql, data, function(err) {
+        if (err) {
+            return console.error(err.message);
+        }              
+    });
     })
 
 app.get('/BDD', function (req, res) {
+    film = req.query.film
+    if (film == undefined)
+        return res.redirect('http://localhost:8000')
     try {
         console.log('first fonction app use');
             console.log(req.url)
             film = req.query.film
                 console.log(film)
                 vid = db.get("SELECT `magnets` FROM video_torrent WHERE `idimdb`= ? ", [film], function(err, row) {
+                try {
+                    console.log(row.magnets)
+                }
+                catch (ERR_HTTP_HEADERS_SENT) {
+                    return res.redirect('http://localhost:8000')
+                    res.end() 
+                }
                 var vid = row.magnets
                 var pa = './video/' + film
                 const engine = torrentStream(vid, {path : pa});
@@ -419,6 +484,9 @@ app.get('/BDD', function (req, res) {
     });
 
 app.get('/SERIE', function (req, res) {
+    film = req.query.film
+    if (film == undefined)
+        return res.redirect('http://localhost:8000')
     try {
         console.log('first fonction app use');
             console.log(req.url)
@@ -427,6 +495,13 @@ app.get('/SERIE', function (req, res) {
             episode = req.query.episode
                 console.log(film)
                 vid = db.get("SELECT `magnets` FROM video_torrent WHERE `idimdb`= ? ", [film], function(err, row) {
+                try {
+                    console.log(row.magnets)
+                }
+                catch (ERR_HTTP_HEADERS_SENT) {
+                    return res.redirect('http://localhost:8000')
+                    res.end() 
+                }
                 var vid = row.magnets
                 var pa = './video/' + film + '_s' + season + '_e' + episode
                 const engine = torrentStream(vid, {path : pa})
