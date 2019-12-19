@@ -82,10 +82,12 @@ app.get('/playserie', function(req, res) {
             return res.redirect('http://localhost:8000')
         tok1 = db.get("SELECT `token` FROM users_profile WHERE `token`= ?", [token1], function(err, row) {
             try {
+                console.log('11111')
                 console.log('MAIS OU EST LE TOKAN ' + row.token)
 
             }
             catch (ERR_HTTP_HEADERS_SENT) {
+                console.log('22222')
                 return res.redirect('http://localhost:8000')
                 res.end() 
             }
@@ -120,8 +122,8 @@ app.get('/playserie', function(req, res) {
                     tup = files[i].split('_')
                     console.log(tup)
                     console.log('tuuuuuuuuuup')
-                    if (tup[3] == undefined)
-                        return res.redirect('http://localhost:8000')
+                    if (tup[3] == undefined) 
+                        console.log('rip')
                     la = tup[3].split('.')
                     ep = '_s' + season + '_e' + episode + '_'
                     console.log(ep)
@@ -137,9 +139,11 @@ app.get('/playserie', function(req, res) {
         try {
             vid = db.get("SELECT `episodes` FROM video_torrent WHERE `idimdb`= ? ", [film], function(err, row) {
                 try {
+                    console.log('4444444')
                     console.log(row)
                 }
                 catch (err) {
+                    console.log('555555')
                     return res.redirect('http://localhost:8000')
                 }
                 try {
@@ -207,16 +211,18 @@ app.get('/playserie', function(req, res) {
                     });
                     }
             catch (ERR_HTTeP_HEADERS_SENT){
-                console.log('33333')
+                console.log('66666')
                 res.end() 
             }
             });
         }
         catch (ERR_HTTP_HEADERS_SENT) {
+            console.log('777777')
             res.redirect('http://localhost:8000')
         }
     }
     catch(ERR_HTTP_HEADERS_SENT) {
+        console.log('8888')
         return res.redirect('http://localhost:8000')
     }
     let vide = ''
@@ -571,28 +577,31 @@ app.get('/SERIE', function (req, res) {
 });
 
 app.use('/subtitles/:idimdb/:lang', function(req, res){
-    console.log('polo')
+    console.log('polo') 
     var filename = __dirname+req.url;
     // This line opens the file as a readable stream
     add = 'subtitles/' + req.params.idimdb
     var readStream = fs.createReadStream(add);
-  
     // This will wait until we know the readable stream is actually valid before piping
     readStream.on('open', function () {
-    //req.setHeader('Content-Type', 'text/plain')
-      // This just pipes the read stream to the response object (which goes to the client)
+    res.setHeader('Content-Type', 'text/javascript')
+      // This just pipes the read constream to the response object (which goes to the client)
       readStream.pipe(res);
     });
   
     // This catches any errors that happen while creating the readable stream (usually invalid names)
     readStream.on('error', function(err) {
-      res.end(err);
+        if (err) {
+            console.log('t dans lerrreur mec' )
+            return res.redirect('http://localhost:8000')
+        }
     });
 
 })
 
 app.get('/movie', function(req, res) {
     res.sendFile(path.join(__dirname + '/movie.ejs'))
+    return res.redirect('http://localhost:8000')
     })
 
 app.get('*', function(req, res){

@@ -40,7 +40,7 @@
                       {% if mov.id in grey %}
                         <a href="{% url 'tittle_video' tittle=mov.id %}"><img class="gris1234" src="{{mov.miniature}}" alt="{{mov.name}}" style="width:100%; filter: grayscale(1) blur(3px);"></a>
                       {% else %}
-                        <a href="{% url 'tittle_video' tittle=mov.id %}"><img id="toto" class="gris1234" src="{{mov.miniature}}" alt="{{mov.name}}" style="width:100%;"></a>
+                        <a href="{% url 'tittle_video' tittle=mov.id %}"><img class="gris1234" src="{{mov.miniature}}" alt="{{mov.name}}" style="width:100%;"></a>
                       {% endif %}
                     {% else %}
                     {% if mov.id in grey %}
@@ -59,11 +59,17 @@
               </div>
             {% endfor %}
   </div>
-  <div id="movieList">
-<p style='color: black;'>Movie 1</p>
-</div>
   {% endif %}
   
+  <!-- END GRID -->
+  
+  <!-- END MAIN -->
+  </div>
+    </main>
+
+      <div id="movieList">
+<p style='color: rgb(20, 20, 20);'>Movie 1</p>
+</div>
   <!-- END GRID -->
   
   <!-- END MAIN -->
@@ -84,7 +90,7 @@ const itemLimit = 10; //total number of items to retrieve
 var nextTopItems = getNextItemSimulator(itemCount); 
 nextTopItems.forEach(function(item) {
 //add the items to your view
-  document.getElementById("movieList").innerHTML += "<p style='color: black;'>"+item+"</p>"; 
+  document.getElementById("movieList").innerHTML += "<p style='color: rgb(20, 20, 20);'>"+item+"</p>"; 
 });
 
 function getNextItemSimulator(currentItem){ 
